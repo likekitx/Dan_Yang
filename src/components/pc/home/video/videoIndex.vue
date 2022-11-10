@@ -32,8 +32,23 @@
 import {onMounted, reactive, ref} from "vue"
 import {storeToRefs} from "pinia"
 import { globalStore } from "@/store/global/global"
+import { routerPush } from "@/store/routerPush";
 import { ElScrollbar } from 'element-plus'
+//路由点击视频放大
+import { useRouter } from 'vue-router'
+const router = useRouter()
+const routerParams = routerPush()
+const videoRef = ref()
 
+const routerView = (srcData:string) => {
+  setTimeout(function (){
+    routerParams.setVideoUrl(srcData)
+    router.push({
+      name: 'videoPlay'
+    });
+  },10)
+}
+const { videoSrc } = storeToRefs(globalStore())
 const scrollBar = ref<InstanceType<typeof ElScrollbar>>()
 onMounted(()=>{
   scrollBar.value!.setScrollTop(0)
@@ -70,31 +85,12 @@ const options = reactive({
   height: "75%",
   color: "#409eff",
   title: "title",
-  poster:"",
   muted: true, //静音
-  // poster:"",//封面
   webFullScreen: false,
   autoPlay: false, //自动播放
   control: false, //是否显示控制
+  spend:false,
 });
-
-const { videoSrc } = storeToRefs(globalStore())
-
-//路由点击视频放大
-import { useRouter } from 'vue-router'
-const router = useRouter()
-
-const routerView = (srcData:string) => {
-  setTimeout(function (){
-    router.push({
-      name: 'videoZoomIn',
-      params:{
-        name:srcData
-      }
-    });
-  },10)
-}
-
 </script>
 
 <style scoped>

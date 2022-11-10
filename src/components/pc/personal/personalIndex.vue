@@ -3,7 +3,6 @@
     <el-scrollbar
         ref="scrollBar"
         height="100%"
-        @scroll="scrollIf"
         :noresize="false">
       <div class="backImg"></div>
       <div class="personalIndexOne">
@@ -57,18 +56,20 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { globalStore } from '@/store/global/global'
-const { imgIconSrc,videoSrc } = storeToRefs(globalStore())
+import { routerPush } from "@/store/routerPush";
 import {onMounted, reactive,onUnmounted, ref} from "vue";
+//路由点击视频放大
+import { useRouter } from 'vue-router'
+import {ElScrollbar} from "element-plus";
+
+const { imgIconSrc,videoSrc } = storeToRefs(globalStore())
+const routerParams = routerPush()
+
 const scrollBar = ref<InstanceType<typeof ElScrollbar>>()
 const isLike = ref(false)
 onMounted(()=>{
   scrollBar.value!.setScrollTop(0)
 })
-const scrollIf = ({ scrollTop })=>{
-  if(scrollTop>=125){
-
-  }
-}
 
 const videoData = ref([
   "走马合唱.mp4",
@@ -104,24 +105,19 @@ const options = reactive({
   title: "title",
   poster:"",
   muted: true, //静音
-  // poster:"",//封面
   webFullScreen: false,
   autoPlay: false, //自动播放
   control: false, //是否显示控制
+  spend:false,
 });
 
-//路由点击视频放大
-import { useRouter } from 'vue-router'
-import {ElScrollbar} from "element-plus";
 const router = useRouter()
 
-const routerView = (srcData) => {
- router.push({
-   name: 'videoZoomIn',
-   params:{
-     name:srcData
-   }
- });
+const routerView = (srcData:string) => {
+  routerParams.setVideoUrl(srcData)
+  router.push({
+    name: 'videoPlay',
+  });
 }
 </script>
 

@@ -33,8 +33,8 @@ const routes:Array<RouteRecordRaw> = [
                 name:'userIndex',
                 component: ()=>import('@/components/pc/personal/personalIndex.vue')
             },{
-                path: 'videoZoomIn',
-                name:'videoZoomIn',
+                path: 'videoPlay',
+                name:'videoPlay',
                 component: ()=>import('@/components/pc/home/video/videoPlay.vue')
             }
         ]

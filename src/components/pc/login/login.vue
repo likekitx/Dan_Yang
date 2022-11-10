@@ -78,7 +78,7 @@ import { encryption,decrypt } from '@/utils/RSAUtil'
 import { GetOs,GetCurrentBrowser } from "@/utils/systemTool";
 import {User} from "@/utils/user/User";
 
-const { imgIconSrc,showWidth,showHeight } = storeToRefs(globalStore())
+const { imgIconSrc } = storeToRefs(globalStore())
 const store = useUser();
 
 const isRight = ref(true)
