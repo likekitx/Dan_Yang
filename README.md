@@ -16,5 +16,3 @@ color: #585353;
 
 box-shadow: 0 0 5px 1px #999    
 
-# Dan_Yang
-# Dan_Yang
