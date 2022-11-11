@@ -19,7 +19,25 @@ const routes:Array<RouteRecordRaw> = [
         path:'/',
         name:'login',
         component: ()=>import('@/components/pc/login/login.vue')
-    },{
+    },
+    {
+        path:'/upload',
+        name:'upload1',
+        component:()=>import('@/components/pc/home/upload/upload1.vue'),
+        children:[
+            {
+                path:'upload2',
+                name:'upload2',
+                component: ()=>import('@/components/pc/home/upload/upload2.vue')
+            },
+            {
+                path:'upload3',
+                name:'upload3',
+                component: ()=>import('@/components/pc/home/upload/upload3.vue')
+            }
+        ]
+    },
+    {
         path:'/home',
         name:'home',
         component: ()=>import('@/components/pc/home/home.vue'),
@@ -49,7 +67,7 @@ const router = createRouter({
 })
 
 // 路由白名单：那些不需要 token 就可以直接访问的页面
-const whiteList = ['/','/reg','/loginOut']
+const whiteList = ['/','/reg','/loginOut','/upload','/home']
 
 //状态管理
 import {useUser} from "@/store/login";

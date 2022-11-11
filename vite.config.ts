@@ -13,15 +13,15 @@ export default defineConfig({
     }
   },
   server: {
-    host: 'relinex.cn',
-    port: 801,
-    proxy: {
+    /* host: 'relinex.cn', */
+    port: 8001,
+   /*  proxy: {
       "/wx": {
         target: "http://relinex.cn:3741",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/wx/, "")
       },
-    },
+    }, */
   },
   define: {
     'process.env': {}

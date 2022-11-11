@@ -1,6 +1,7 @@
 <template>
   <left/>
   <Search />
+  <upload />
   <userTem />
   <el-divider />
   <router-view/>
@@ -10,6 +11,7 @@
 import left from '@/components/pc/home/leftHurdle/leftHurdle.vue'
 import Search from '@/components/pc/home/search/search.vue'
 import userTem from '@/components/pc/home/user/userTem.vue'
+import upload from '@/components/pc/home/upload/upload.vue'
 </script>
 
 <style scoped>

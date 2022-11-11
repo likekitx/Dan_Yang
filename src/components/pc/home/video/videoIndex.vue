@@ -35,7 +35,7 @@ import { globalStore } from "@/store/global/global"
 import { routerPush } from "@/store/routerPush";
 import { ElScrollbar } from 'element-plus'
 //路由点击视频放大
-import { useRouter } from 'vue-router'
+import  { useRouter } from 'vue-router'
 const router = useRouter()
 const routerParams = routerPush()
 const videoRef = ref()

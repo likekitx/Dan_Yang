@@ -1,6 +1,6 @@
 <template>
   <div class="left">
-    <div class="logoLeftClass">ReLineX</div>
+    <div class="logoLeftClass" @click="gohome">ReLineX</div>
     <div @click="isCollapse = !isCollapse" :collapse="isCollapse" class="iconFlexible"
          :style="[
              { left: isCollapse ? '28%' : '81%' },
@@ -11,33 +11,18 @@
           <component :is='isCollapse ? "ArrowRight" : "ArrowLeft"' />
         </el-icon>
     </div>
-    <el-menu id="leftMenu" default-active="1" class="left-menu" style="z-index: -1;border-right: none" :collapse="isCollapse">
-      <el-menu-item index="1">
-        <el-icon :size="30">
-          <component is="AddLocation" />
+    <el-menu id="leftMenu" default-active="1" class="left-menu" style="border-right: none" :collapse="isCollapse">
+      
+      <el-menu-item
+          v-for="(data,index) in ic"
+          @click="go(data.router)"
+          :index="index"
+          :key="index">
+        <el-icon
+            :size="30">
+          <component :is="data.src"/>
         </el-icon>
-        <template #title>蛋蛋1</template>
-      </el-menu-item>
-
-      <el-menu-item index="2">
-        <el-icon :size="30">
-          <component is="Aim" />
-        </el-icon>
-        <template #title>蛋蛋12</template>
-      </el-menu-item>
-
-      <el-menu-item index="3">
-        <el-icon :size="30">
-          <component is="AlarmClock" />
-        </el-icon>
-        <template #title>蛋蛋3</template>
-      </el-menu-item>
-
-      <el-menu-item index="4">
-        <el-icon :size="30">
-          <component is="AlarmClock" />
-        </el-icon>
-        <template #title>蛋蛋3</template>
+        <template #title>{{data.message}}</template>
       </el-menu-item>
     </el-menu>
   </div>
@@ -45,12 +30,35 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from 'vue'
+import router from '@/router'
 
 const isCollapse = ref(true)
 const menuHeight = ref()
 onMounted(()=>{
   menuHeight.value = document.getElementById("leftMenu")?.scrollHeight
 })
+const gohome=()=>{
+  router.push({path:'/home'})
+}
+
+const ic = ref(
+    [{
+      src:"AddLocation",
+      message:"首页",
+      router:'/home'
+    },{
+      src:"Aim",
+      message:"推荐",
+      router:'/home'
+    },{
+      src:"AlarmClock",
+      message:"关注",
+      router:'/home'
+    },],
+)
+const go=(ip: any)=>{
+  router.push({path:ip})
+}
 </script>
 
 <style scoped>
