@@ -2,11 +2,22 @@
     <div class="uploadmain">
         <div class="uploadLeft">
             <div class="leftmain">
-          
+                <p>发布视频</p>
+              <textarea type="text"  class="inputup" placeholder="请输入作品描述"></textarea>
+              <div class="btn">
+                <button>#话题</button>
+                <button>@好友</button>
             </div>
+            </div>
+            
         </div>
         <div class="uploadRight">
-
+            <div class="video">
+                <vue3VideoPlay
+                  :="options"
+                  :src="(videoSrc+srcData)"
+              />
+            </div>
         </div>
     </div>
 
@@ -23,22 +34,37 @@
     display: flex;
     flex-direction: row;
     >.uploadLeft{
-        width: 60%;
+        width: 50%;
         display: flex;
         flex-direction: column;
-        background-color: azure;
         >.leftmain{
             margin-left: 5%;
             margin-top: 3%;
-            background-color: rgb(86, 88, 88);
             width: 50%;
             height: 90%;
-           
+            display: flex;
+            flex-direction: column;
+            >.inputup{
+                width: 50%;
+                height: 20%;
+                border-radius: 7px;
+                border:0;
+                background-color:rgba(241,241,241,.98);
+                resize: none;
+            }
+            >.btn{
+                margin-top: 5px;
+                padding-left: 35%;
+            }
+            
            
         }
     }
     >.uploadRight{
         width: 40%;
+        >.video{
+            margin-top: 60px;
+        }
     }
 }
 

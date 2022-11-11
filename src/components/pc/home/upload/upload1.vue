@@ -100,8 +100,7 @@ const upload=()=>{
   .el-main {
     background-color: #E9EEF3;
     color: #333;
-    text-align: center;
-    line-height: 160px;
+    text-align:left;
     border-radius: 7px;
     margin-top: 10px;
     box-shadow: 0px 0px 8px 3px rgba(0,0,0,0.2);
