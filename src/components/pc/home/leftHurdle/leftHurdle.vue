@@ -1,43 +1,49 @@
 <template>
   <div class="left">
-    <div class="logoLeftClass">ReLineX</div>
-    <div @click="isCollapse = !isCollapse" :collapse="isCollapse" class="iconFlexible"
-         :style="[
+    <div
+        @click="answerHome"
+        class="logoLeftClass">ReLineX</div>
+    <div
+        :style="[
              { left: isCollapse ? '28%' : '81%' },
+             { height: outHeight + 'px' }
+         ]"
+        class="out-div">
+      <div @click="isCollapse = !isCollapse" :collapse="isCollapse" class="iconFlexible"
+           :style="[
              { height: menuHeight + 'px' }
          ]">
 
         <el-icon :size="35">
           <component :is='isCollapse ? "ArrowRight" : "ArrowLeft"' />
         </el-icon>
+      </div>
     </div>
-    <el-menu id="leftMenu" default-active="1" class="left-menu" style="z-index: -1;border-right: none" :collapse="isCollapse">
+    <el-menu id="leftMenu"
+             default-active="1"
+             :style="[
+                 {width: isCollapse ? '28%' : '87.5%'}
+             ]"
+             class="left-menu"
+             :collapse="isCollapse">
       <el-menu-item index="1">
-        <el-icon :size="30">
-          <component is="AddLocation" />
-        </el-icon>
-        <template #title>蛋蛋1</template>
+        <el-icon :size="30"><HomeFilled /></el-icon>
+        <template #title>首页</template>
       </el-menu-item>
 
       <el-menu-item index="2">
-        <el-icon :size="30">
-          <component is="Aim" />
-        </el-icon>
-        <template #title>蛋蛋12</template>
+        <el-icon :size="30"><Guide /></el-icon>
+        <template #title>导航</template>
       </el-menu-item>
 
       <el-menu-item index="3">
-        <el-icon :size="30">
-          <component is="AlarmClock" />
-        </el-icon>
-        <template #title>蛋蛋3</template>
+        <el-icon :size="30"><SortUp /></el-icon>
+        <template #title>推送</template>
       </el-menu-item>
 
       <el-menu-item index="4">
-        <el-icon :size="30">
-          <component is="AlarmClock" />
-        </el-icon>
-        <template #title>蛋蛋3</template>
+        <el-icon :size="30"><UploadFilled /></el-icon>
+        <template #title>上传视频</template>
       </el-menu-item>
     </el-menu>
   </div>
@@ -45,12 +51,21 @@
 
 <script setup lang="ts">
 import {onMounted, ref} from 'vue'
-
+import { storeToRefs } from "pinia";
+import { globalStore } from "@/store/global/global";
+const { showHeight } = storeToRefs(globalStore())
+import { useRouter } from "vue-router";
+const router = useRouter()
 const isCollapse = ref(true)
 const menuHeight = ref()
+const outHeight = ref()
 onMounted(()=>{
+  outHeight.value = showHeight.value - (showHeight.value * 0.072)
   menuHeight.value = document.getElementById("leftMenu")?.scrollHeight
 })
+const answerHome = ()=>{
+  router.push({name: "index"})
+}
 </script>
 
 <style scoped>
@@ -79,23 +94,34 @@ onMounted(()=>{
   -webkit-font-smoothing: none;
 }
 .iconFlexible {
-  /*border: 1px solid black;*/
-  position: absolute;
-  width: 18.5%;
-  top: 7%;
-  border-right: 1px solid #dcdfe6;
+  width: 100%;
+  margin-top: 36px;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  transition: 0.5s;
   cursor: pointer;
+  z-index: 4;
+}
+.out-div{
+  position: absolute;
+  width: 18.5%;
+  top: 7%;
+  border-right: 1px solid #dcdfe6;
+  transition: 0.5s;
+  display: flex;
+  flex-direction: column;
+}
+.left-menu{
+  margin-top: 36px;
+  transition: 0.5s;
+  border-right: none;
 }
 .el-menu-item {
   font-size: 18px;
   font-family: “Microsoft YaHei”, sans-serif;
   color: #585353;
-  -webkit-font-smoothing: none;
+  width: 100%;
   /*border: 1px solid black;*/
 }
 </style>

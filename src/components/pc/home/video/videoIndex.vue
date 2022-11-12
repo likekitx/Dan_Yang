@@ -10,10 +10,7 @@
             :key="key"
             @click.capture="routerView(srcData)"
             class="videoBtu">
-          <vue3VideoPlay
-              :="options"
-              :src="(videoSrc+srcData)"
-          />
+          <video class="videoClass" :src="(videoSrc+srcData)"/>
           <div class="introduceClass">
             <span class="introduceSpan">简介</span>
             <div class="nameTime">
@@ -38,7 +35,6 @@ import { ElScrollbar } from 'element-plus'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const routerParams = routerPush()
-const videoRef = ref()
 
 const routerView = (srcData:string) => {
   setTimeout(function (){
@@ -79,18 +75,6 @@ const videoData = ref([
   "英文不认识.mp4",
   "疑心病.mp4",
 ])
-
-const options = reactive({
-  width: "100%",
-  height: "75%",
-  color: "#409eff",
-  title: "title",
-  muted: true, //静音
-  webFullScreen: false,
-  autoPlay: false, //自动播放
-  control: false, //是否显示控制
-  spend:false,
-});
 </script>
 
 <style scoped>
@@ -99,7 +83,7 @@ const options = reactive({
   top: 8.5%;
   left: 10.4%;
   width: 88%;
-  height: 90.7%;
+  height: 90.8%;
   /*border: 1px solid black;*/
 }
 .indexClassRow{
@@ -120,6 +104,13 @@ const options = reactive({
   height: 390px;
   background-color: #252632;
   border-radius: 13px;
+  overflow: hidden;
+}
+.videoClass{
+  width: 100%;
+  height: 75%;
+  background-color: #000000;
+  border-radius: 13px 13px 0 0;
 }
 .introduceClass{
   display: flex;
@@ -162,14 +153,5 @@ const options = reactive({
   display: flex;
   flex-direction: row;
   justify-content: center;
-}
-:deep(.d-player-wrap){
-  border-radius: 13px 13px 0 0;
-}
-:deep(.d-player-input){
-  cursor: pointer;
-}
-:deep(.d-play-btn){
-  display: none!important;
 }
 </style>

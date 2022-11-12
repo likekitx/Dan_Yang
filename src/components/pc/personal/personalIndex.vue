@@ -30,7 +30,6 @@
             <span>喜欢</span>
             <span>收藏</span>
             <span>观看历史</span>
-            <span>昵称</span>
           </div>
           <div class="userVideo">
             <div
@@ -38,10 +37,7 @@
                 :key="key"
                 @click.capture="routerView(srcData)"
                 class="videoBtu">
-              <vue3VideoPlay
-                  :="options"
-                  :src="(videoSrc+srcData)"
-              />
+              <video class="videoClass" :src="(videoSrc+srcData)"/>
               <div class="introduceClass">
                 <span class="introduceSpan">简介</span>
               </div>
@@ -97,20 +93,6 @@ const videoData = ref([
   "英文不认识.mp4",
   "疑心病.mp4",
 ])
-
-const options = reactive({
-  width: "100%",
-  height: "100%",
-  color: "#409eff",
-  title: "title",
-  poster:"",
-  muted: true, //静音
-  webFullScreen: false,
-  autoPlay: false, //自动播放
-  control: false, //是否显示控制
-  spend:false,
-});
-
 const router = useRouter()
 
 const routerView = (srcData:string) => {
@@ -127,7 +109,7 @@ const routerView = (srcData:string) => {
   top: 8.5%;
   left: 10.4%;
   width: 88%;
-  height: 90.7%;
+  height: 90.8%;
   /*border: 1px solid black;*/
 }
 .personalIndexOne{
@@ -266,8 +248,16 @@ const routerView = (srcData:string) => {
   /*width: 398px;*/
   width: 17%;
   height: 400px;
+  overflow: hidden;
   /*border: 1px solid black;*/
   /*border-radius: 13px;*/
+}
+.videoClass{
+  width: 100%;
+  height: 86%;
+  background-color: #000000;
+  /*border: 1px solid black;*/
+  border-radius: 12px;
 }
 .introduceClass{
   display: flex;
@@ -288,21 +278,4 @@ const routerView = (srcData:string) => {
   display: flex;
   flex-wrap: wrap;
 }
-:deep(.d-player-wrap){
-  border-radius: 13px;
-}
-:deep(.d-player-input){
-  cursor: pointer;
-}
-:deep(.d-play-btn){
-  display: none!important;
-}
-
-
-
-
-
-
-
-
 </style>

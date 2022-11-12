@@ -9,8 +9,8 @@
         ]"
         class="sxClass"></div>
     <div
-        @mouseenter="flag = !flag"
-        @mouseleave="flag = !flag"
+        @mouseenter="leaveIn"
+        @mouseleave="leaveOut"
         @click="onUser"
         :style="[
             {backgroundImage: 'url('+imgIconSrc+'user.png)'},
@@ -18,37 +18,37 @@
             ]"
         class="userClass">
     </div>
-    <el-collapse-transition>
-      <div
-          v-show="flag"
-          @mouseenter="flag = !flag"
-          @mouseleave="flag = !flag"
-          class="topTopPadding">
-        <div class="publicUserTemClass">
-          <el-card>
-            <div
-                class="divLikeClass"
-                v-for="data in data"
-                :key="data">
-              <div
-                  :style="[
-                    {backgroundImage: 'url('+imgIconSrc+data.src+')'}
-                    ]"
-                  class="divImgClass">
-              </div>
-              <span>{{data.count}}</span>
-              <span>{{data.alt}}</span>
-            </div>
-          </el-card>
-          <el-card>
-            <div class="divOut">
-              <span>个人主页</span>
-              <span @click="userLoginOut">退出登陆</span>
-            </div>
-          </el-card>
+  </div>
+  <div
+      @mouseenter="leaveIn"
+      @mouseleave="leaveOut"
+      :style="[
+          { height : flag ? '17%' : '0' }
+        ]"
+      class="userTemOut">
+    <div
+        :style="[{display: outFlag ? 'block' : 'none'}]"
+        class="topTopPadding">
+      <div class="publicUserTemTop">
+        <div
+            class="divLikeClass"
+            v-for="data in data"
+            :key="data">
+          <div
+              :style="[
+              {backgroundImage: 'url('+imgIconSrc+data.src+')'}
+              ]"
+              class="divImgClass">
+          </div>
+          <span>{{data.count}}</span>
+          <span>{{data.alt}}</span>
         </div>
       </div>
-    </el-collapse-transition>
+      <div class="divOut">
+        <span>个人主页</span>
+        <span @click="userLoginOut">退出登陆</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -74,7 +74,22 @@
   }
   //是否显示
   const flag = ref(false)
-
+  const outFlag = ref(false)
+  let setTime1: number,setTime2: number;
+  const leaveOut = ()=>{
+    setTime1 = setTimeout(function (){
+      flag.value = false
+      setTime2 = setTimeout(function () {
+        outFlag.value = false
+      },150)
+    },100)
+  }
+  const leaveIn = ()=>{
+    clearTimeout(setTime1);
+    clearTimeout(setTime2);
+    outFlag.value = true
+    flag.value = true
+  }
   const data = ref([
     {
       src:"userWorkIcon.png",
@@ -117,23 +132,23 @@
 .userTemClass{
   /*border: 1px solid black;*/
   position: absolute;
-  width: 15%;
+  width: 16%;
   height: 5.5%;
-  right: 24px;
+  right: 1.6%;
   top: 1%;
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
 }
 .sxClass{
-  width: 10%;
+  width: 15%;
   height: 100%;
   background-position: center;
   background-repeat: no-repeat;
 }
 .userClass{
-  width: 18.5%;
+  width: 16.8%;
   height: 100%;
   border-radius: 50%;
   background-color: #ededef;
@@ -141,21 +156,34 @@
   background-position: center center;
   background-repeat: no-repeat;
 }
+.userTemOut{
+  position: absolute;
+  top: 7.5%;
+  right: 1.6%;
+  width: 18%;
+  z-index: 4;
+  cursor: pointer;
+  transition: 0.3s cubic-bezier(0.16, 0.97, 0.22, 1.18);
+}
 .topTopPadding{
   position: absolute;
-  top: 95%;
-  right: 3%;
-  width: 109%;
-  z-index: 99;
-  height: 340%;
-}
-.publicUserTemClass{
-  box-shadow: 0 0 5px 1px #999;
-  margin-top: 6%;
-  z-index: 100;
+  width: 100%;
+  /*border: 1px solid black;*/
+  height: 100%;
+  overflow: hidden;
   border-radius: 7px;
+  box-shadow: 0 0 5px 1px #999;
+}
+.publicUserTemTop{
+  border-radius: 7px 7px 0 0;
+  /*border: 1px solid black;*/
   background-color: white;
   width: 100%;
+  height: 74%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
 }
 .divLikeClass {
   display: inline-flex;
@@ -163,35 +191,33 @@
   justify-content: center;
   align-items: center;
   width: 20%;
-  margin: 3% 2%;
   font-size: 15px;
   cursor: pointer;
-  height: 110%;
+  height: 100%;
   color: #615e5e;
 }
 .divLikeClass:hover{
   color: #000000;
 }
 .divLikeClass:hover .divImgClass{
-  background-size: 90%;
+  background-size: 95%;
 }
 .divImgClass{
   background-repeat: no-repeat;
   background-position: center center;
   background-size: 100%;
-  width: 76%;
-  height: 48px;
+  width: 74%;
+  height: 70%;
 }
 .divOut{
   display: inline-flex;
   flex-direction: row;
   justify-content: space-around;
-  /*border: 1px solid black;*/
   align-items: center;
-  margin: 4px 0;
-  /*width: 308px;*/
-  /*height: 38px;*/
+  background-color: white;
+  height: 26%;
   width: 100%;
+  border-radius: 0 0 7px 7px;
 }
 .divOut span{
   display: inline-flex;
