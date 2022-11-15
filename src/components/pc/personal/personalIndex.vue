@@ -4,102 +4,206 @@
         ref="scrollBar"
         height="100%"
         :noresize="false">
-      <div class="backImg"></div>
       <div class="personalIndexOne">
         <div class="personalIndexTwo">
           <div class="userMessage">
             <div class="userMessage-top-head">
-              <img :src="(imgIconSrc+'user.png')" alt="头像">
+              <img :src="(personalMessage.userHeadImg)" alt="头像">
             </div>
             <div class="userMessage-top-message">
-              <span class="userMessage-top-message-span1">喜欢雪</span>
+              <span class="userMessage-top-message-span1">{{ personalMessage.userNickname }}</span>
               <div class="userMessage-top-message-sex">
-                <span>reline号:123123123</span>
-                <span class="userMessage-top-message-sex-span2">男18岁</span>
+                <span>reline号:{{ personalMessage.userReline }}</span>
+                <span class="userMessage-top-message-sex-span2">{{ personalMessage.userSex }}  {{personalMessage.userAge}}岁</span>
               </div>
-              <span class="userMessage-top-message-span2">海鸥海鸥别叫啦，</span>
+              <span class="userMessage-top-message-span2">{{ personalMessage.userIntroduce }}</span>
               <div class="threeNumber">
-                <span>关注wq eq w</span>
-                <span>粉丝</span>
-                <span>获赞</span>
+                <span>关注{{ subNumber(personalMessage.userAttentionCount) }}</span>
+                <span>粉丝{{ subNumber(personalMessage.userFansCount) }}</span>
+                <span>获赞{{ subNumber(personalMessage.hasUserLikeCount) }}</span>
               </div>
             </div>
           </div>
           <div class="userMessage-bottom">
-            <span>作品</span>
-            <span>喜欢</span>
-            <span>收藏</span>
-            <span>观看历史</span>
+            <span
+                @click="clickPersonalSpan(1)"
+                @mouseleave="cardLeave(1)"
+                @mouseenter="cardOver(1)"
+                :class="{userMessageBottomSpanClass: 1 === minIndex}"
+            >作品{{ subNumber(personalMessage.userVideoCount) }}</span>
+            <span
+                @click="clickPersonalSpan(2)"
+                @mouseleave="cardLeave(2)"
+                @mouseenter="cardOver(2)"
+                :class="{userMessageBottomSpanClass: 2 === minIndex}"
+            >喜欢{{subNumber(personalMessage.userVideoLikeCount) }}</span>
+            <span
+                @click="clickPersonalSpan(3)"
+                @mouseleave="cardLeave(3)"
+                @mouseenter="cardOver(3)"
+                :class="{userMessageBottomSpanClass: 3 === minIndex}"
+            >收藏{{ subNumber(personalMessage.userVideoCollectCount) }}</span>
+            <span
+                @click="clickPersonalSpan(4)"
+                @mouseleave="cardLeave(4)"
+                @mouseenter="cardOver(4)"
+                :class="{userMessageBottomSpanClass: 4 === minIndex}"
+            >观看历史{{ subNumber(personalMessage.userVideoHistoryCount) }}</span>
+<!--            <span-->
+<!--                @click="addLeaveMessage"-->
+<!--            >留言</span>-->
+            <span>留言</span>
           </div>
           <div class="userVideo">
-            <div
-                v-for="(srcData,key) in videoData"
-                :key="key"
-                @click.capture="routerView(srcData)"
-                class="videoBtu">
-              <video class="videoClass" :src="(videoSrc+srcData)"/>
-              <div class="introduceClass">
-                <span class="introduceSpan">简介</span>
-              </div>
-            </div>
+            <el-row
+                :gutter="20"
+                style="width: 100%;height: 100%"
+                justify="left">
+              <el-col
+                  :span="6"
+                  v-for="(video,index) in personalVideo"
+                  :key="index"
+                  @click.capture="routerView(video)"
+                  class="videoBtu">
+                <video class="videoClass" :src="(video.videoUrl)"/>
+                <div class="introduceClass">
+                  <span class="introduceSpan">{{ video.videoIntroduce }}</span>
+                </div>
+              </el-col>
+            </el-row>
           </div>
         </div>
       </div>
     </el-scrollbar>
   </div>
+
+  <el-dialog v-model="dialogFormVisible" title="留言">
+    <el-form :model="form">
+      <el-form-item label="内容" :label-width="formLabelWidth">
+        <el-input v-model="form.message" autocomplete="off" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="addleave(personalMessage.userId,loginUserIndex.userId)">
+          发送
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { globalStore } from '@/store/global/global'
-import { routerPush } from "@/store/routerPush";
-import {onMounted, reactive,onUnmounted, ref} from "vue";
+import { videoStore } from "@/store/video/videoStore";
+import { loginStore } from "@/store/login/loginStore";
+import { userStore } from "@/store/user/userStore";
+import {getPersonal} from '@/api/userApi/userApi'
+import {getUserVideo, getUserVideoCollect, getUserVideoHistory, getUserVideoLike} from '@/api/video/videoApi'
+import {onMounted, reactive, onBeforeMount, ref, watch} from "vue";
 //路由点击视频放大
-import { useRouter } from 'vue-router'
-import {ElScrollbar} from "element-plus";
+import { useRouter,useRoute } from 'vue-router'
+import { subNumber } from '@/utils/utilsTool'
+import {ElScrollbar,ElLoading,ElMessage} from "element-plus";
+import {VIDEO} from "@/api/utils/video";
+import { loading } from '@/utils/user/userUtils'
+import {visitorsStore} from "@/store/visitors/visitorsStore";
+import { addVisitors } from '@/api/visitors/visitorsApi'
+import { addLeave } from '@/api/leaveMessage/leaveMessageApi'
 
 const { imgIconSrc,videoSrc } = storeToRefs(globalStore())
-const routerParams = routerPush()
+const { videoPageIndex,videoPlayIndex,personalVideo } = storeToRefs(videoStore())
+const { loginUserIndex } = storeToRefs(loginStore())
+const { personalMessage,userTemMessage,personalNumber } = storeToRefs(userStore())
+const { visitorsNum } = storeToRefs(visitorsStore())
+const videoPush = videoStore()
 
 const scrollBar = ref<InstanceType<typeof ElScrollbar>>()
 const isLike = ref(false)
 onMounted(()=>{
   scrollBar.value!.setScrollTop(0)
 })
+watch(personalNumber, async (newQuestion, oldQuestion) => {
+  minIndexFlag.value = newQuestion
+  minIndexIf.value = true
+  minIndex.value = newQuestion
+  clickPersonalSpan(newQuestion)
+})
+const dialogTableVisible = ref(false)
+const dialogFormVisible = ref(false)
+const formLabelWidth = '140px'
 
-const videoData = ref([
-  "走马合唱.mp4",
-  "走马.mp4",
-  "周星驰（再见）.mp4",
-  "这就是爱.mp4",
-  "长大秋千.mp4",
-  "云烟成雨.mp4",
-  "原谅我不可自拔.mp4",
-  "英文不认识.mp4",
-  "疑心病.mp4",  "这就是爱.mp4",
-  "长大秋千.mp4",
-  "云烟成雨.mp4",
-  "原谅我不可自拔.mp4",
-  "英文不认识.mp4",
-  "疑心病.mp4",  "这就是爱.mp4",
-  "长大秋千.mp4",
-  "云烟成雨.mp4",
-  "原谅我不可自拔.mp4",
-  "英文不认识.mp4",
-  "疑心病.mp4",  "这就是爱.mp4",
-  "长大秋千.mp4",
-  "云烟成雨.mp4",
-  "原谅我不可自拔.mp4",
-  "英文不认识.mp4",
-  "疑心病.mp4",
-])
+const form = reactive({
+  message: ''
+})
+const addLeaveMessage = ()=>{
+  dialogFormVisible.value = true
+}
+const addleave = (leaveId:string,userId:string)=>{
+  addLeave(leaveId,userId,form.message).then((res)=>{
+    ElMessage({
+      type: 'success',
+      message:res.data.message
+    })
+    dialogFormVisible.value = false
+  })
+}
+const minIndex = ref(personalNumber.value)
+const minIndexFlag = ref(1)
+const minIndexIf = ref(false)
+const cardOver = (index:number)=>{
+  minIndex.value = index
+}
+const cardLeave = (index:number)=>{
+  if(minIndexIf.value === false){
+    minIndex.value = 1
+  }else {
+    minIndex.value = minIndexFlag.value
+  }
+}
 const router = useRouter()
-
-const routerView = (srcData:string) => {
-  routerParams.setVideoUrl(srcData)
-  router.push({
-    name: 'videoPlay',
-  });
+const clickPersonalSpan = (number:number)=>{
+  minIndexFlag.value = number
+  minIndexIf.value = true
+  loading()
+  setTimeout(function () {
+    switch (number){
+      case 1:
+        getUserVideo(personalMessage.value.userId).then((res)=>{
+          videoPush.setPersonalVideo(null);
+          videoPush.setPersonalVideo(JSON.parse(res.data.data.personalVideoList));
+        })
+        break;
+      case 2:
+        getUserVideoLike(personalMessage.value.userId).then((res)=>{
+          videoPush.setPersonalVideo(null);
+          videoPush.setPersonalVideo(JSON.parse(res.data.data.personalVideoList));
+        })
+        break;
+      case 3:
+        getUserVideoCollect(personalMessage.value.userId).then((res)=>{
+          videoPush.setPersonalVideo(null);
+          videoPush.setPersonalVideo(JSON.parse(res.data.data.personalVideoList));
+        })
+        break;
+      case 4:
+        getUserVideoHistory(personalMessage.value.userId).then((res)=>{
+          videoPush.setPersonalVideo(null);
+          videoPush.setPersonalVideo(JSON.parse(res.data.data.personalVideoList));
+        })
+        break;
+    }
+  },300)
+}
+const routerView = (video:VIDEO.personalVideo) => {
+  setTimeout(function (){
+    videoPush.setVideoPageIndex(video)
+    router.push({
+      name: 'videoPlay'
+    });
+  },100)
 }
 </script>
 
@@ -145,6 +249,8 @@ const routerView = (srcData:string) => {
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  border-radius: 50%;
+  overflow: hidden;
 }
 .userMessage-top-head>img{
   width: 100%;
@@ -158,18 +264,20 @@ const routerView = (srcData:string) => {
   flex-direction: column;
   justify-content: space-around;
   align-items: start;
-  font-family: Microsoft YaHei;
+  font-weight: bold;
+  font-family: STKaiti,sans-serif;
 }
-/*.userMessage-top-message span{*/
-/*  border: 1px solid black;*/
-/*}*/
 .userMessage-top-message-span1{
+  font-weight: bold;
+  font-family: KaiTi,sans-serif;
   height: 25%;
-  font-size: 22px;
+  font-size: 24px;
 }
 .userMessage-top-message-span2{
   height: 20%;
   font-size: 16px;
+  font-weight: bold;
+  font-family: STKaiti,sans-serif;
 }
 .userMessage-top-message-sex{
   width: 100%;
@@ -180,8 +288,11 @@ const routerView = (srcData:string) => {
   /*border: 1px solid black;*/
   align-items: center;
   font-size: 14px;
+  padding-left: 3px;
+  font-family: STFangsong,sans-serif;
 }
 .userMessage-top-message-sex-span2{
+  border: 1px dashed #cdcdcd;
   margin-left: 20px;
 }
 .threeNumber{
@@ -212,26 +323,32 @@ const routerView = (srcData:string) => {
   position: sticky;
   top: 0;
   width: 100%;
-  padding: 2% 0;
+  padding: 1% 0;
   /*border: 1px solid #0079ff;*/
   background-color: #f9fbfd;
   display: flex;
   flex-direction: row;
   justify-content: left;
+  font-family: KaiTi,sans-serif;
   align-items: center;
   z-index: 100;
 }
 .userMessage-bottom span{
   /*border: 1px solid black;*/
-  font-size: 19px;
-  font-family: STHeiti;
-  padding-right: 50px;
+  font-size: 22px;
+  font-weight: bold;
+  width: 12%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 1% 0;
+  align-items: center;
   cursor: pointer;
+  transition: 0.5s cubic-bezier(0.72, 0.88, 0.54, 1);
 }
-.userMessage-bottom span:nth-child(5){
-  margin-left: 18%;
-  padding: 0;
-}
+.userMessageBottomSpanClass{
+  background-color: #eaebf3;
+ }
 .userVideo{
   width: 100%;
   display: flex;
@@ -245,12 +362,10 @@ const routerView = (srcData:string) => {
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
-  /*width: 398px;*/
-  width: 17%;
+  width: 18%;
   height: 400px;
+  cursor: pointer;
   overflow: hidden;
-  /*border: 1px solid black;*/
-  /*border-radius: 13px;*/
 }
 .videoClass{
   width: 100%;
@@ -272,10 +387,12 @@ const routerView = (srcData:string) => {
 }
 .introduceSpan{
   margin: 2%;
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 17px;
   /*border: 1px solid black;*/
   display: flex;
   flex-wrap: wrap;
+  text-align: left;
+  font-weight: bold;
+  font-family: KaiTi,sans-serif;
 }
 </style>

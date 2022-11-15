@@ -25,13 +25,6 @@ request.interceptors.request.use((config)=>{
 
 //响应拦截
 request.interceptors.response.use((response)=>{
-    //如果响应的里有token，就本地存储
-    if(response.data.data.token){
-        //localStorage(多标签页共享)
-        localStorage.setItem("token",response.data.data.token)
-    }else {
-        return response;
-    }
     return response
 },(error)=>{
     //异常提示

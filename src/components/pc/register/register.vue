@@ -12,11 +12,18 @@
         </el-icon>
         <div class="register-right">
           <div>relinex</div>
-          <el-form ref="refOne" :model="refFormOne" :rules="oneRules" label-width="100px" class="register-form"
+          <el-form
+              ref="refOne" :model="refFormOne"
+              :rules="oneRules" label-width="100px"
+              class="register-form"
             :size="formSize" status-icon>
             <div class="formNameClass">
               <img :src="(imgIconSrc + 'resName.png')" alt="">
-              <el-form-item class="register-form-item" label="姓名" label-width="65px" prop="userName" required>
+              <el-form-item
+                  class="register-form-item"
+                  label="姓名"
+                  label-width="65px"
+                  prop="userName" required>
                 <el-input class="register-form-item-input" v-model="refFormOne.userName" />
               </el-form-item>
             </div>
@@ -115,9 +122,15 @@
           <div>relinex</div>
           <el-form ref="refThree" :model="refFormThree" :rules="threeRules" label-width="100px"
             class="register-form-three" :size="formSize" status-icon>
-            <el-upload class="avatar-uploader" action="http://127.0.0.1:801/wx/rl/head" :show-file-list="false"
-              :data="{ userPhone: refFormOne.userPhone }" name="headImg" :on-success="handleAvatarSuccess"
-              :before-upload="beforeAvatarUpload" :on-error="handleAvatarError">
+            <el-upload
+                class="avatar-uploader"
+                action="http://relinex.cn:801/wx/snow/user/head"
+                :show-file-list="false"
+                :data="{ userPhone: refFormOne.userPhone }"
+                name="headImg"
+                :on-success="handleAvatarSuccess"
+                :before-upload="beforeAvatarUpload"
+                :on-error="handleAvatarError">
               <img v-if="imageUrl" :src="imageUrl" class="avatar" />
               <el-icon v-else class="avatar-uploader-icon">
                 <Plus />
@@ -153,13 +166,13 @@ import { EluiChinaAreaDht } from 'elui-china-area-dht'
 import { globalStore } from "@/store/global/global";
 import { storeToRefs } from "pinia";
 import { reactive, ref } from 'vue'
-import type { FormInstance, FormRules } from 'element-plus'
-import { registerOne } from "@/api/login/login";
+import type { FormInstance,UploadFile, FormRules } from 'element-plus'
+import { registerOne } from "@/api/userApi/userApi";
 import { encryption, decrypt } from '@/utils/RSAUtil'
 import { GetOs, GetCurrentBrowser } from "@/utils/systemTool";
 import { ElMessage } from 'element-plus'
 import type { UploadInstance } from 'element-plus'
-import { register } from "@/api/login/login";
+import { register } from "@/api/userApi/userApi";
 import { toRaw } from '@vue/reactivity'
 import { Plus } from '@element-plus/icons-vue'
 import type { UploadProps } from 'element-plus'
@@ -381,8 +394,6 @@ const twoNext = () => {
     })
   }
 }
-
-const uploadRef = ref<UploadInstance>()
 const router = useRouter()
 
 const submitForm = async (oneRef: FormInstance | undefined, twoRef: FormInstance | undefined, threeRef: FormInstance | undefined) => {
@@ -398,8 +409,8 @@ const submitForm = async (oneRef: FormInstance | undefined, twoRef: FormInstance
                 if (refFormThree.userAbout === '') {
                   refFormThree.userAbout = "这个家伙很懒，什么都没留下!"
                 }
-                // refFormOne.userAddress = addressName(chinaData, refFormOne.userAddress)
-
+                refFormOne.userAddress = addressName(chinaData, refFormOne.userAddress)
+                console.log(refFormOne.userAddress)
                 register({
                   userName: refFormOne.userName,
                   userSex: refFormOne.userSex,
@@ -462,7 +473,6 @@ const handleAvatarSuccess: UploadProps['onSuccess'] = (
   uploadFile
 ) => {
   imageUrl.value = URL.createObjectURL(uploadFile.raw!)
-  console.log(imageUrl.value)
   ElMessage({
     showClose: true,
     message: response,
@@ -478,7 +488,6 @@ const handleAvatarError: UploadProps['onError'] = (
     type: 'success',
   })
 }
-
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
   if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png' && rawFile.type !== 'image/jpg') {
     ElMessage.error('图片格式只支持image/jpeg/png/jpg')

@@ -11,12 +11,14 @@
     <div
         @mouseenter="leaveIn"
         @mouseleave="leaveOut"
-        @click="onUser"
+        element-loading-svg-view-box="-10, -10, 50, 50"
+        @click="onUser(loginUserIndex.userId)"
         :style="[
-            {backgroundImage: 'url('+imgIconSrc+'user.png)'},
-             {backgroundSize: '90%'}
+            { width: iconWidth + 'px' },
+            {backgroundImage: 'url('+loginUserIndex.userHeadImg+')'},
+             {backgroundSize: '100%'}
             ]"
-        class="userClass">
+        class="userClass custom-loading-svg">
     </div>
   </div>
   <div
@@ -31,21 +33,56 @@
         class="topTopPadding">
       <div class="publicUserTemTop">
         <div
-            class="divLikeClass"
-            v-for="data in data"
-            :key="data">
+            @click="myVideo(1)"
+            class="divLikeClass">
           <div
               :style="[
-              {backgroundImage: 'url('+imgIconSrc+data.src+')'}
+              {backgroundImage: 'url('+imgIconSrc+'myVideoIcon.png'+')'}
               ]"
               class="divImgClass">
           </div>
-          <span>{{data.count}}</span>
-          <span>{{data.alt}}</span>
+          <span>{{subNumber(userTemMessage.userVideoCount)}}</span>
+          <span>我的作品</span>
+        </div>
+        <div
+            @click="myVideo(2)"
+            class="divLikeClass">
+          <div
+              :style="[
+              {backgroundImage: 'url('+imgIconSrc+'likeIcon.png'+')'}
+              ]"
+              class="divImgClass">
+          </div>
+          <span>{{subNumber(userTemMessage.userVideoLike)}}</span>
+          <span>我的喜欢</span>
+        </div>
+        <div
+            @click="myVideo(3)"
+            class="divLikeClass">
+          <div
+              :style="[
+              {backgroundImage: 'url('+imgIconSrc+'collectIconYellow.png'+')'}
+              ]"
+              class="divImgClass">
+          </div>
+          <span>{{subNumber(userTemMessage.userVideoCollect) }}</span>
+          <span>我的收藏</span>
+        </div>
+        <div
+            @click="myVideo(4)"
+            class="divLikeClass">
+          <divq
+              :style="[
+              {backgroundImage: 'url('+imgIconSrc+'historyIcon.png'+')'}
+              ]"
+              class="divImgClass">
+          </divq>
+          <span>{{subNumber(userTemMessage.userVideoHistory) }}</span>
+          <span>浏览历史</span>
         </div>
       </div>
       <div class="divOut">
-        <span>个人主页</span>
+        <span @click="onUser(loginUserIndex.userId)">个人主页</span>
         <span @click="userLoginOut">退出登陆</span>
       </div>
     </div>
@@ -53,79 +90,92 @@
 </template>
 
 <script setup lang="ts">
-  import visitor from './visitor/visitor.vue'
-  import message from './comment/comment.vue'
-  import leaveMessage from './leaveMessage/leaveMessage.vue'
-  import { globalStore } from "@/store/global/global";
-  import {storeToRefs} from "pinia";
-  import {ref} from "vue";
-
-  //路由点击头像跳转
-  import { useRouter } from 'vue-router'
-  import {loginOut} from "@/api/login/login";
-  import {ElMessage} from "element-plus";
-
-  const { imgIconSrc } = storeToRefs(globalStore())
-  const router = useRouter()
-  const onUser = () => {
+import visitor from './visitor/visitor.vue'
+import message from './comment/comment.vue'
+import leaveMessage from './leaveMessage/leaveMessage.vue'
+import { globalStore } from "@/store/global/global";
+import {storeToRefs} from "pinia";
+import {onBeforeMount, ref} from "vue";
+import {getPersonal, getUserTemMessage} from '@/api/userApi/userApi'
+import {getUserVideo} from '@/api/video/videoApi'
+//路由点击头像跳转
+import { useRouter } from 'vue-router'
+import {loginOut} from "@/api/login/loginApi";
+import {ElLoading, ElMessage, ElNotification} from "element-plus";
+import {loginStore} from "@/store/login/loginStore";
+import {videoStore} from "@/store/video/videoStore";
+import { subNumber } from '@/utils/utilsTool'
+import {userStore} from "@/store/user/userStore";
+import {getPersonalMessage} from "@/utils/user/userUtils";
+const { loginUserIndex } = storeToRefs(loginStore())
+const { imgIconSrc,showHeight } = storeToRefs(globalStore())
+const router = useRouter()
+const userPinia = userStore()
+const onUser = (userId:string) => {
+  getPersonalMessage(userId)
+  userPinia.setPersonalNumber(1)
+  if (router.currentRoute._rawValue.path !== '/home/userIndex'){
+    setTimeout(function () {
+      router.push({
+        name: "userIndex",
+      })
+    },300)
+  }
+}
+const iconWidth = ref()
+onBeforeMount(()=>{
+  iconWidth.value = showHeight.value * 0.055
+})
+const myVideo=(number:number)=>{
+  if (router.currentRoute._rawValue.path !== '/home/userIndex'){
     router.push({
-      name:'userIndex'
+      name:"userIndex"
     })
   }
-  //是否显示
-  const flag = ref(false)
-  const outFlag = ref(false)
-  let setTime1: number,setTime2: number;
-  const leaveOut = ()=>{
-    setTime1 = setTimeout(function (){
-      flag.value = false
-      setTime2 = setTimeout(function () {
-        outFlag.value = false
-      },150)
-    },100)
-  }
-  const leaveIn = ()=>{
-    clearTimeout(setTime1);
-    clearTimeout(setTime2);
-    outFlag.value = true
-    flag.value = true
-  }
-  const data = ref([
-    {
-      src:"userWorkIcon.png",
-      alt:"我的作品",
-      count:4,
-    },{
-      src:"likeIcon.png",
-      alt:"我的喜欢",
-      count:23,
-    },{
-      src:"collectIconYellow.png",
-      alt:"我的收藏",
-      count:56,
-    },{
-      src:"historyIcon.png",
-      alt:"浏览历史",
-      count:14,
-    }
-  ])
+  userPinia.setPersonalNumber(number)
+}
+//是否显示
+const flag = ref(false)
+const outFlag = ref(false)
+let setTime1: number,setTime2: number;
+const leaveOut = ()=>{
+  setTime1 = setTimeout(function (){
+    flag.value = false
+    setTime2 = setTimeout(function () {
+      outFlag.value = false
+    },150)
+  },100)
+}
+const userTemMethod = userStore()
+const userTemMessage = ref({})
+const leaveIn = ()=>{
+  getUserTemMessage(loginUserIndex.value.userId).then((res)=>{
+    userTemMessage.value = JSON.parse(res.data.data.userTemMessage)
+    userTemMethod.setUserTemMessage(JSON.parse(res.data.data.userTemMessage))
+  })
+  clearTimeout(setTime1);
+  clearTimeout(setTime2);
+  outFlag.value = true
+  flag.value = true
+}
 
-  const userLoginOut = ()=>{
-    loginOut().then((res)=>{
-      console.log(res);
-      if(res.data.code === 20000){
-        localStorage.removeItem("token")
-        ElMessage({
-          showClose: true,
-          message: res.data.message,
-          type: 'success'
-        })
-        setTimeout(function () {
-          router.push({name:'login'});
-        },500)
-      }
-    })
-  }
+const userLoginOut = ()=>{
+  loginOut().then((res)=>{
+    console.log(res);
+    if(res.data.code === 20000){
+      localStorage.removeItem("token")
+      ElNotification({
+        title: '退出登陆',
+        message: "您已退出登录",
+        type: 'success',
+        duration:1000
+      })
+      setTimeout(function () {
+        router.push({name:'login'});
+      },1000)
+    }
+  })
+}
 </script>
 
 <style scoped>
@@ -148,7 +198,6 @@
   background-repeat: no-repeat;
 }
 .userClass{
-  width: 16.8%;
   height: 100%;
   border-radius: 50%;
   background-color: #ededef;

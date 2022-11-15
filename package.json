@@ -16,6 +16,7 @@
     "elui-china-area-dht": "^2.0.0",
     "jsencrypt": "^3.3.0",
     "pinia": "^2.0.17",
+    "pinia-plugin-persistedstate": "^2.4.0",
     "rimraf": "^3.0.2",
     "unplugin-icons": "^0.14.7",
     "vue": "^3.2.37",

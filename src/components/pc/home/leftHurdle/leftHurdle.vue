@@ -3,68 +3,180 @@
     <div
         @click="answerHome"
         class="logoLeftClass">ReLineX</div>
+    <div class="menuClass">
+      <div class="menuIcon">
+        <span>
+          <el-icon color="#6b65f0" :size="30"><HomeFilled /></el-icon>
+        </span>
+        <span>
+          <el-icon color="#e58fac" :size="30"><Guide /></el-icon>
+        </span>
+        <span>
+          <el-icon color="#efb336" :size="30"><SortUp /></el-icon>
+        </span>
+        <span>
+          <el-icon color="#1296db" :size="30"><UploadFilled /></el-icon>
+        </span>
+      </div>
+      <div
+          :style="[
+              {width: isCollapse ? '50%' : '0'}
+          ]"
+          class="menuOne">
+        <span @click="answerHome">首页</span>
+        <span @click="gdw">你敢点我</span>
+        <span @click="yjx">有惊喜</span>
+<!--        <span @click="upFile">上传视频</span>-->
+        <span>上传视频</span>
+      </div>
+    </div>
     <div
         :style="[
-             { left: isCollapse ? '28%' : '81%' },
-             { height: outHeight + 'px' }
-         ]"
-        class="out-div">
-      <div @click="isCollapse = !isCollapse" :collapse="isCollapse" class="iconFlexible"
-           :style="[
-             { height: menuHeight + 'px' }
-         ]">
-
+            {right: isCollapse ? '0' : '50%'}
+        ]"
+        class="rightIcon">
+      <div @click="isCollapse = !isCollapse"
+           class="iconFlexible">
         <el-icon :size="35">
           <component :is='isCollapse ? "ArrowRight" : "ArrowLeft"' />
         </el-icon>
       </div>
     </div>
-    <el-menu id="leftMenu"
-             default-active="1"
-             :style="[
-                 {width: isCollapse ? '28%' : '87.5%'}
-             ]"
-             class="left-menu"
-             :collapse="isCollapse">
-      <el-menu-item index="1">
-        <el-icon :size="30"><HomeFilled /></el-icon>
-        <template #title>首页</template>
-      </el-menu-item>
-
-      <el-menu-item index="2">
-        <el-icon :size="30"><Guide /></el-icon>
-        <template #title>导航</template>
-      </el-menu-item>
-
-      <el-menu-item index="3">
-        <el-icon :size="30"><SortUp /></el-icon>
-        <template #title>推送</template>
-      </el-menu-item>
-
-      <el-menu-item index="4">
-        <el-icon :size="30"><UploadFilled /></el-icon>
-        <template #title>上传视频</template>
-      </el-menu-item>
-    </el-menu>
   </div>
+
+  <el-dialog
+      v-model="dialogVisible"
+      title="呸，你坏坏！"
+      width="30%"
+      :before-close="handleClose"
+  >
+    <span>好了好了，这次真不逗你啦！</span>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="wxzss">我想在试试？</el-button>
+        <el-button type="primary" @click="qfg">
+          求放过
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from 'vue'
+import {onMounted,h, ref} from 'vue'
 import { storeToRefs } from "pinia";
 import { globalStore } from "@/store/global/global";
-const { showHeight } = storeToRefs(globalStore())
 import { useRouter } from "vue-router";
+import { loading } from "@/utils/user/userUtils";
+import {ElMessage,ElNotification,ElLoading,ElMessageBox,ElSwitch } from "element-plus";
+import {set} from "@vueuse/core";
+const { showHeight,showWidth } = storeToRefs(globalStore())
 const router = useRouter()
 const isCollapse = ref(true)
-const menuHeight = ref()
-const outHeight = ref()
+const svg = `
+        <path class="path" d="
+          M 30 15
+          L 28 17
+          M 25.61 25.61
+          A 15 15, 0, 0, 1, 15 30
+          A 15 15, 0, 1, 1, 27.99 7.5
+          L 15 15
+        " style="stroke-width: 4px; fill: rgba(0, 0, 0, 0)"/>
+      `
 onMounted(()=>{
-  outHeight.value = showHeight.value - (showHeight.value * 0.072)
-  menuHeight.value = document.getElementById("leftMenu")?.scrollHeight
 })
+const upFile = ()=>{
+  loading()
+  setTimeout(function () {
+    router.push({
+      name:'upFile'
+    })
+  },500)
+}
+const yjx = ()=>{
+  let we = setInterval(function () {
+    loading()
+  },100)
+  setTimeout(function () {
+    clearInterval(we)
+  },5000)
+}
+const wxzss = ()=>{
+  ElNotification({
+    title:"小子够欠",
+    message:"算了算了，放过你啦！",
+    type:"success",
+    duration:1000
+  })
+  setTimeout(function () {
+    dialogVisible.value = false
+  },1000)
+}
+const qfg = ()=>{
+  let op = setInterval(function () {
+    ElMessage({
+      message:"呸,就不放过你!",
+      type:"error",
+      showClose:true,
+      duration:300
+    })
+  },100)
+  setTimeout(function () {
+    clearInterval(op)
+    ElNotification({
+      message:"算了，下一位!",
+      type:"success",
+      duration:1000
+    })
+    dialogVisible.value = false
+  },4000)
+}
+const dialogVisible = ref(false)
+const gdw = ()=>{
+  ElMessage({
+    showClose:true,
+    message: "你还真点？",
+    type:'success',
+    duration:4000
+  })
+  setTimeout(function () {
+    const checked = ref<boolean | string | number>(false)
+    ElMessageBox({
+      title: '惊喜吗？在点下面这个试试？',
+      // Should pass a function if VNode contains dynamic props
+      message: () =>
+          h(ElSwitch, {
+            modelValue: checked.value,
+            'onUpdate:modelValue': (val: boolean | string | number) => {
+              checked.value = val
+              if(val===true){
+                dialogVisible.value = true
+              }
+            },
+          }),
+    })
+  },1000)
+}
+const handleClose = (done: () => void) => {
+  ElMessageBox.confirm('你还敢关闭我?')
+      .then(() => {
+        done()
+      })
+      .catch(() => {
+      })
+}
 const answerHome = ()=>{
-  router.push({name: "index"})
+  const loading = ElLoading.service({
+    lock: true,
+    text: '王雪亲亲，正在加载请稍等!',
+    background: 'rgb(255,255,255)',
+    spinner:svg,
+    svgViewBox:'-10 -10 50 50'
+  })
+  setTimeout(function () {
+    loading.close()
+    router.push({name: "index"})
+  },700)
 }
 </script>
 
@@ -93,35 +205,68 @@ const answerHome = ()=>{
   font-family: “Microsoft YaHei”, sans-serif;
   -webkit-font-smoothing: none;
 }
+.menuClass{
+  width: 99.5%;
+  position: absolute;
+  left: 0;
+  top: 7%;
+  height: 88%;
+  padding-top: 20%;
+  display: inline-flex;
+  flex-direction: row;
+}
+.menuIcon{
+  width: 30%;
+  height: 24%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.menuIcon span{
+  height: 25%;
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+.menuOne{
+  overflow: hidden;
+  transition: width 0.4s ease-in;
+  height: 24%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 20px;
+  color: #494747;
+  font-family: STKaiti,sans-serif;
+  font-weight: 600;
+}
+.menuOne span{
+  white-space: nowrap;
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 25%;
+  cursor: pointer;
+}
 .iconFlexible {
   width: 100%;
-  margin-top: 36px;
+  height: 24%;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  z-index: 4;
 }
-.out-div{
+.rightIcon{
   position: absolute;
-  width: 18.5%;
   top: 7%;
+  width: 20%;
+  height: 88%;
   border-right: 1px solid #dcdfe6;
-  transition: 0.5s;
-  display: flex;
-  flex-direction: column;
-}
-.left-menu{
-  margin-top: 36px;
-  transition: 0.5s;
-  border-right: none;
-}
-.el-menu-item {
-  font-size: 18px;
-  font-family: “Microsoft YaHei”, sans-serif;
-  color: #585353;
-  width: 100%;
-  /*border: 1px solid black;*/
+  padding-top: 20%;
+  transition: right 0.4s ease-in;
 }
 </style>

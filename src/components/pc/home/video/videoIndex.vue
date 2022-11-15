@@ -5,76 +5,62 @@
         height="100%"
         :noresize="false">
       <div class="indexClassRow">
-        <div
-            v-for="(srcData,key) in videoData"
-            :key="key"
-            @click.capture="routerView(srcData)"
-            class="videoBtu">
-          <video class="videoClass" :src="(videoSrc+srcData)"/>
-          <div class="introduceClass">
-            <span class="introduceSpan">简介</span>
-            <div class="nameTime">
-              <span>@曹蛋蛋</span>
-              <span>~</span>
-              <span>2022年</span>
+        <el-row
+            :gutter="20"
+            style="width: 100%;height: 100%"
+            justify="left">
+          <el-col
+              :span="6"
+              v-for="(video,index) in videoData"
+              :key="index"
+              @click.capture="routerView(video)"
+              class="videoBtu">
+            <video class="videoClass" :src="(video.videoUrl)"/>
+            <div class="introduceClass">
+              <span class="introduceSpan">{{ video.videoIntroduce }}</span>
+              <div class="nameTime">
+                <span>{{ video.userNickName }}</span>
+                <span>~</span>
+                <span>{{ video.videoCreateTime }}</span>
+              </div>
             </div>
-          </div>
-        </div>
+          </el-col>
+        </el-row>
       </div>
     </el-scrollbar>
   </div>
 </template>
 
 <script setup lang="ts">
-import {onMounted, reactive, ref} from "vue"
-import {storeToRefs} from "pinia"
-import { globalStore } from "@/store/global/global"
-import { routerPush } from "@/store/routerPush";
+import {onBeforeMount, onMounted, reactive, ref} from "vue"
+import { videoStore } from "@/store/video/videoStore";
+import { storeToRefs } from "pinia";
 import { ElScrollbar } from 'element-plus'
+import { VIDEO } from "@/api/utils/video"; 
 //路由点击视频放大
 import { useRouter } from 'vue-router'
+import { requestHomeVideo } from '@/api/video/videoApi'
 const router = useRouter()
-const routerParams = routerPush()
+const routerParams = videoStore()
 
-const routerView = (srcData:string) => {
+const routerView = (videoPageIndex:VIDEO.videoPageIndex) => {
   setTimeout(function (){
-    routerParams.setVideoUrl(srcData)
+    routerParams.setVideoPageIndex(videoPageIndex)
     router.push({
       name: 'videoPlay'
     });
-  },10)
+  },100)
 }
-const { videoSrc } = storeToRefs(globalStore())
 const scrollBar = ref<InstanceType<typeof ElScrollbar>>()
 onMounted(()=>{
   scrollBar.value!.setScrollTop(0)
 })
-const videoData = ref([
-  "走马合唱.mp4",
-  "走马.mp4",
-  "周星驰（再见）.mp4",
-  "这就是爱.mp4",
-  "长大秋千.mp4",
-  "云烟成雨.mp4",
-  "原谅我不可自拔.mp4",
-  "英文不认识.mp4",
-  "疑心病.mp4",  "这就是爱.mp4",
-  "长大秋千.mp4",
-  "云烟成雨.mp4",
-  "原谅我不可自拔.mp4",
-  "英文不认识.mp4",
-  "疑心病.mp4",  "这就是爱.mp4",
-  "长大秋千.mp4",
-  "云烟成雨.mp4",
-  "原谅我不可自拔.mp4",
-  "英文不认识.mp4",
-  "疑心病.mp4",  "这就是爱.mp4",
-  "长大秋千.mp4",
-  "云烟成雨.mp4",
-  "原谅我不可自拔.mp4",
-  "英文不认识.mp4",
-  "疑心病.mp4",
-])
+let videoData = ref([])
+onBeforeMount(()=>{
+  requestHomeVideo().then((res)=>{
+    videoData.value = JSON.parse(res.data.data.videoList)
+  })
+})
 </script>
 
 <style scoped>
@@ -102,9 +88,8 @@ const videoData = ref([
   /*width: 398px;*/
   width: 23%;
   height: 390px;
-  background-color: #252632;
-  border-radius: 13px;
   overflow: hidden;
+  cursor: pointer;
 }
 .videoClass{
   width: 100%;
@@ -120,29 +105,35 @@ const videoData = ref([
   width: 100%;
   height: 25%;
   color: white;
+  border-radius: 0 0 13px 13px;
+  background-color: #252632;
   font-family:“Microsoft YaHei”,sans-serif;
   /*border: 1px solid black;*/
 }
 .introduceSpan{
-  width: 90%;
-  height: 70%;
-  font-size: 18px;
-  font-weight: 500;
+  width: 92%;
+  height: 55%;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: KaiTi,sans-serif;
   /*border: 1px solid black;*/
   display: flex;
   flex-direction: row;
+  text-align: left;
   align-items: center;
 }
 .nameTime{
   display: flex;
   flex-direction: row;
   align-items: center;
-  width: 90%;
+  width: 95%;
   height: 30%;
   /*border: 1px solid black;*/
 }
 .nameTime span{
-  font-size: 15px;
+  font-size: 16px;
+  font-family: STKaiti,sans-serif;
+  font-weight: bold;
   /*border: 1px solid black;*/
   display: flex;
   flex-direction: row;
@@ -151,6 +142,8 @@ const videoData = ref([
 .nameTime span:nth-child(2){
   width: 30px;
   display: flex;
+  font-size: 14px;
+  font-family: "Arial","Microsoft YaHei","黑体","宋体",sans-serif;
   flex-direction: row;
   justify-content: center;
 }

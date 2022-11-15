@@ -17,7 +17,7 @@ export default defineConfig({
     port: 801,
     proxy: {
       "/wx": {
-        target: "http://relinex.cn:3741",
+        target: "http://relinex.cn:3742",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/wx/, "")
       },

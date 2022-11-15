@@ -55,7 +55,7 @@
                           v-model="ruleForm.userPassword" />
               </el-form-item>
             </div>
-            <div class="loginRes" @click="loginRegister">注册</div>
+<!--            <div class="loginRes" @click="loginRegister">注册</div>-->
             <el-button class="formButtonSubmit" type="primary" @click="submitForm(ruleFormRef)">登陆</el-button>
           </el-form>
         </div>
@@ -65,21 +65,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ElMessage } from 'element-plus'
+import { ElMessage,ElNotification } from 'element-plus'
 import {storeToRefs} from "pinia";
 import { globalStore } from "@/store/global/global";
-import { useUser } from "@/store/login";
+import { loginStore } from "@/store/login/loginStore";
 import {reactive, ref,onMounted } from 'vue'
 import type { FormInstance,FormRules} from 'element-plus'
 import {useRouter,useRoute} from "vue-router";
-import {getRsa,login} from "@/api/login/login";
+import {getRsa,login} from "@/api/login/loginApi";
 //RSA加密
 import { encryption,decrypt } from '@/utils/RSAUtil'
 import { GetOs,GetCurrentBrowser } from "@/utils/systemTool";
-import {User} from "@/utils/user/User";
-
 const { imgIconSrc } = storeToRefs(globalStore())
-const store = useUser();
+const store = loginStore();
 
 const isRight = ref(true)
 
@@ -125,10 +123,17 @@ const submitForm = async (formEl: FormInstance | undefined) => {
               })
             }else if (res.data.code === 20000) {
               store.setToken(res.data.data.token);
+              localStorage.setItem("token",res.data.data.token)
               store.setAuth(true);
-              store.setUser({
-                userHeadUrl : decrypt(res.data.data.message,privateKey.value)
-              });
+              if(!cityName.value){
+                cityName.value = "未知"
+              }
+              store.setLoginUserIndex({
+                userAddress: cityName.value,
+                userHeadImg: res.data.data.data.userHeadImg,
+                userId: res.data.data.data.userId,
+                userNickName: res.data.data.data.userNickName
+              })
               ElMessage({
                 showClose: true,
                 message: res.data.message,
@@ -136,9 +141,10 @@ const submitForm = async (formEl: FormInstance | undefined) => {
               })
               setTimeout(function () {
                 router.push(route.query.redirect || '/home');
-              },100)
+              },1000)
             }
           }).catch((error)=>{
+            console.log(error)
               ElMessage({
                 showClose: true,
                 message: "登陆出错，请联系管理员!",
@@ -148,11 +154,12 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         }else {
           ElMessage({
             showClose: true,
-            message: "登陆出错，请联系管理员!",
+            message: "没有返回数据",
             type: 'error'
           })
         }
       }).catch((error)=>{
+        console.log(error)
         ElMessage({
           showClose: true,
           message: "登陆出错，请联系管理员!",
@@ -162,7 +169,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     } else {
       ElMessage({
         showClose: true,
-        message: "登陆出错，请联系管理员!",
+        message: "没有返回数据",
         type: 'error'
       })
     }
